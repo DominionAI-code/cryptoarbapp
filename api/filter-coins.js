@@ -1,18 +1,27 @@
-const express = require("express");
-const cors = require("cors");
-const axios = require("axios");
-require("dotenv").config();
+import express from "express";
+import cors from "cors";
+import axios from "axios";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 const app = express();
-const PORT = 5000;
+const PORT = 4000;
 
-app.use(cors());
+app.use(cors({ origin: "http://localhost:5173" }));
 app.use(express.json());
 
-// Filter coins API
+// Route for filtering coins
 app.get("/api/filter-coins", async (req, res) => {
   try {
     const { minPrice, maxPrice, minVolume, maxVolume, marketCap } = req.query;
+
+    // Parse query parameters into numbers
+    const parsedMinPrice = parseFloat(minPrice);
+    const parsedMaxPrice = parseFloat(maxPrice);
+    const parsedMinVolume = parseFloat(minVolume);
+    const parsedMaxVolume = parseFloat(maxVolume);
+    const parsedMarketCap = parseFloat(marketCap);
 
     // Fetch coins data from the CoinGecko API
     const { data } = await axios.get("https://api.coingecko.com/api/v3/coins/markets", {
@@ -28,12 +37,13 @@ app.get("/api/filter-coins", async (req, res) => {
     // Filter coins based on query parameters
     const filteredCoins = data.filter((coin) => {
       const withinPriceRange =
-        (!minPrice || coin.current_price >= minPrice) &&
-        (!maxPrice || coin.current_price <= maxPrice);
+        (isNaN(parsedMinPrice) || coin.current_price >= parsedMinPrice) &&
+        (isNaN(parsedMaxPrice) || coin.current_price <= parsedMaxPrice);
       const withinVolumeRange =
-        (!minVolume || coin.total_volume >= minVolume) &&
-        (!maxVolume || coin.total_volume <= maxVolume);
-      const withinMarketCap = !marketCap || coin.market_cap >= marketCap;
+        (isNaN(parsedMinVolume) || coin.total_volume >= parsedMinVolume) &&
+        (isNaN(parsedMaxVolume) || coin.total_volume <= parsedMaxVolume);
+      const withinMarketCap =
+        isNaN(parsedMarketCap) || coin.market_cap >= parsedMarketCap;
 
       return withinPriceRange && withinVolumeRange && withinMarketCap;
     });

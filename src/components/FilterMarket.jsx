@@ -14,7 +14,7 @@ const FilterMarket = () => {
   // Fetch coins based on the filters
   const fetchFilteredCoins = async () => {
     try {
-      const response = await axios.get("http://localhost:5000/api/filter-coins", {
+      const response = await axios.get(`/api/filter-coins`, {
         params: {
           minPrice: priceRange.min || undefined,
           maxPrice: priceRange.max || undefined,
@@ -23,11 +23,18 @@ const FilterMarket = () => {
           marketCap: marketCap || undefined,
         },
       });
+  
+      if (response.data.length === 0) {
+        console.warn("No coins match the filter criteria.");
+      }
+  
       setFilteredCoins(response.data);
     } catch (error) {
       console.error("Error fetching filtered coins:", error.message);
+      setFilteredCoins([]); // Clear filtered coins if there's an error
     }
   };
+  
 
   // Input handler functions
   const handlePriceChange = (key, value) => {
@@ -62,7 +69,7 @@ const FilterMarket = () => {
               }`}
             >
               {coin.price_change_percentage_24h < 0 ? <DownTrending /> : <UpTrending />}
-              {coin.price_change_percentage_24h?.toFixed(2)}%
+              {coin.price_change_percentage_24h}%
             </span>
           </div>
         </div>

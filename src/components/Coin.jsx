@@ -18,7 +18,7 @@ const Coin = ({ coin }) => {
           }`}
         >
           {coin.price_change_percentage_24h < 0 ? <DownTrending /> : <UpTrending />}
-          {coin.price_change_percentage_24h?.toFixed(2)}%
+          {coin.price_change_percentage_24h}%
         </span>
       </div>
     </Link>
@@ -26,5 +26,3 @@ const Coin = ({ coin }) => {
 };
 
 export default Coin;
-
-

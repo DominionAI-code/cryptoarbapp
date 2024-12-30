@@ -9,30 +9,44 @@ const CoinList = () => {
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const maxPages = 100; // Maximum pages to display
+  
 
   const loadCoins = async (page) => {
     try {
       setLoading(true); // Show loading indicator
+      setError(null); // Clear previous errors
+  
       const pageCoins = await fetchCoinsByPage(page);
-      setCoins(pageCoins);
+  
+      if (pageCoins.length === 0) {
+        setError("No coins available for this page.");
+        return;
+      }
+  
+      setCoins(pageCoins); // Update the state with the coins of the current page
     } catch (err) {
-      console.error("Error fetching coins:", err);
-      setError("Failed to load coins. Please try again later.");
+      console.error("Error fetching coins:", err.message);
+      setError(err.message); // Set error message to display to the user
     } finally {
       setLoading(false); // Hide loading indicator
     }
   };
 
   useEffect(() => {
-    loadCoins(currentPage); // Load coins for the current page on mount or page change
+    // Fetch coins whenever the current page changes
+    loadCoins(currentPage);
   }, [currentPage]);
 
   const handleNextPage = () => {
-    if (currentPage < maxPages) setCurrentPage((prevPage) => prevPage + 1);
+    if (currentPage < maxPages) {
+      setCurrentPage((prevPage) => prevPage + 1);
+    }
   };
 
   const handlePrevPage = () => {
-    if (currentPage > 1) setCurrentPage((prevPage) => prevPage - 1);
+    if (currentPage > 1) {
+      setCurrentPage((prevPage) => prevPage - 1);
+    }
   };
 
   if (loading) {
@@ -81,5 +95,3 @@ const CoinList = () => {
 };
 
 export default CoinList;
-
-
